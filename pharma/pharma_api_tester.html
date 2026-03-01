@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PharmaFlow — API Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#060910;
+  --s1:#0d1117;
+  --s2:#111827;
+  --s3:#1a2236;
+  --s4:#1e2d45;
+  --border:#1e2d45;
+  --border2:#263548;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#475569;
+  --text4:#2d3f55;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Plus Jakarta Sans',sans-serif;
+  --get:#22c55e;
+  --post:#38bdf8;
+  --put:#f59e0b;
+  --del:#ef4444;
+  --po:#38bdf8;
+  --admin:#818cf8;
+  --sup:#34d399;
+  --sk:#fbbf24;
+  --ph:#f472b6;
+  --green:#22c55e;
+  --red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── HEADER ── */
+.header{
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  padding:16px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-logo{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,#38bdf8,#818cf8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#000;font-family:var(--mono);
+}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-0.5px;}
+.brand-name span{color:var(--po);}
+.brand-tag{
+  font-family:var(--mono);font-size:9px;color:var(--text3);
+  letter-spacing:2px;text-transform:uppercase;margin-top:2px;
+}
+.base-url-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:8px;padding:7px 14px;
+}
+.base-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;}
+.base-inp{
+  background:none;border:none;outline:none;
+  font-family:var(--mono);font-size:13px;color:var(--po);
+  width:260px;
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--text4);transition:background 0.3s;
+}
+.status-dot.online{background:var(--green);box-shadow:0 0 8px var(--green);}
+.status-dot.offline{background:var(--red);}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 62px);}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+.sidebar-section{margin-bottom:4px;}
+.section-header{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px 8px;
+  cursor:pointer;
+  user-select:none;
+}
+.section-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:var(--mono);}
+.section-count{
+  margin-left:auto;font-family:var(--mono);font-size:9px;
+  padding:2px 6px;border-radius:10px;font-weight:600;
+  background:rgba(255,255,255,0.05);color:var(--text3);
+}
+.section-toggle{color:var(--text3);font-size:10px;margin-left:4px;transition:transform 0.2s;}
+.section-toggle.open{transform:rotate(90deg);}
+
+.endpoint-list{overflow:hidden;}
+.ep-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px 9px 32px;
+  cursor:pointer;
+  transition:background 0.1s;
+  border-left:2px solid transparent;
+}
+.ep-item:hover{background:rgba(255,255,255,0.03);}
+.ep-item.active{background:rgba(56,189,248,0.06);border-left-color:var(--po);}
+.method-tag{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:3px;letter-spacing:0.5px;
+  min-width:38px;text-align:center;flex-shrink:0;
+}
+.m-get{background:rgba(34,197,94,0.15);color:var(--get);}
+.m-post{background:rgba(56,189,248,0.15);color:var(--post);}
+.m-put{background:rgba(245,158,11,0.15);color:var(--put);}
+.ep-name{font-size:11.5px;color:var(--text2);font-weight:500;line-height:1.3;}
+.ep-item.active .ep-name{color:var(--text);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── REQUEST PANE ── */
+.request-pane{
+  flex:1;overflow-y:auto;padding:24px 28px 24px 28px;
+}
+.request-pane::-webkit-scrollbar{width:4px;}
+.request-pane::-webkit-scrollbar-thumb{background:var(--border2);}
+
+.req-header{margin-bottom:20px;}
+.req-role{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  padding:3px 10px;border-radius:20px;
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.req-title{font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;}
+.req-desc{font-size:13px;color:var(--text2);line-height:1.6;}
+
+.url-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s2);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 16px;
+  margin-bottom:20px;
+  overflow:visible;
+}
+.url-method{
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  padding:4px 12px;border-radius:5px;
+  flex-shrink:0;
+}
+.url-path{
+  font-family:var(--mono);font-size:13px;color:var(--text2);
+  flex:1;background:none;border:none;outline:none;color:var(--text);
+}
+.send-btn{
+  padding:8px 20px;border-radius:7px;
+  font-size:13px;font-weight:700;
+  cursor:pointer;border:none;
+  font-family:var(--sans);
+  background:var(--po);color:#000;
+  transition:all 0.15s;
+  display:flex;align-items:center;gap:6px;
+  flex-shrink:0;
+}
+.send-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.send-btn:active{transform:none;}
+.send-btn.loading{opacity:0.7;cursor:not-allowed;}
+
+.section-title-sm{
+  font-size:11px;font-weight:700;font-family:var(--mono);
+  color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.section-title-sm::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.body-editor{
+  background:var(--s2);border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;margin-bottom:20px;
+}
+.editor-head{
+  padding:10px 16px;background:var(--s3);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.editor-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;}
+.copy-btn{
+  background:none;border:1px solid var(--border2);
+  color:var(--text3);font-size:10px;padding:3px 8px;
+  border-radius:4px;cursor:pointer;font-family:var(--mono);
+  transition:all 0.1s;
+}
+.copy-btn:hover{color:var(--text);border-color:var(--text3);}
+textarea.body-ta{
+  width:100%;background:none;border:none;outline:none;
+  font-family:var(--mono);font-size:12px;color:#a5d6ff;
+  padding:14px 16px;resize:none;min-height:160px;
+  line-height:1.7;
+}
+
+/* ── RESPONSE PANE ── */
+.response-pane{
+  height:320px;flex-shrink:0;
+  background:var(--s1);
+  border-top:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.res-header{
+  padding:12px 20px;background:var(--s2);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;
+}
+.res-title{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;}
+.res-status{
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  padding:3px 10px;border-radius:4px;display:none;
+}
+.res-status.ok{background:rgba(34,197,94,0.15);color:var(--green);display:inline-flex;}
+.res-status.err{background:rgba(239,68,68,0.15);color:var(--red);display:inline-flex;}
+.res-time{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.res-body{
+  flex:1;overflow-y:auto;padding:14px 18px;
+  font-family:var(--mono);font-size:12px;line-height:1.8;
+  color:var(--text2);
+}
+.res-body::-webkit-scrollbar{width:4px;}
+.res-body::-webkit-scrollbar-thumb{background:var(--border2);}
+.res-placeholder{
+  color:var(--text4);font-style:italic;
+  display:flex;align-items:center;justify-content:center;
+  height:100%;font-size:13px;
+}
+
+/* JSON syntax colors */
+.j-key{color:#79c0ff;}
+.j-str{color:#a5d6ff;}
+.j-num{color:#f0883e;}
+.j-bool{color:#ff7b72;}
+.j-null{color:#8b949e;}
+.j-punc{color:#8b949e;}
+
+/* ── FLOW GUIDE ── */
+.flow-guide{
+  padding:16px 20px;
+  background:var(--s3);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+  overflow-x:auto;flex-shrink:0;
+}
+.fg-step{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  font-size:11px;font-weight:600;
+  white-space:nowrap;cursor:pointer;
+  border:1px solid transparent;
+  transition:all 0.15s;
+}
+.fg-step:hover{filter:brightness(1.2);}
+.fg-sep{color:var(--text4);font-size:12px;flex-shrink:0;}
+.fg-num{
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;background:rgba(255,255,255,0.1);
+}
+
+/* ── CHECKLIST ── */
+.checklist{
+  background:var(--s2);border-top:1px solid var(--border);
+  padding:14px 16px;width:100%;
+  flex-shrink:0;
+}
+.cl-title{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.cl-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--text3);
+  padding:3px 0;
+  transition:color 0.2s;
+}
+.cl-item.done{color:var(--green);}
+.cl-check{
+  width:15px;height:15px;border-radius:50%;
+  border:1.5px solid var(--text4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;flex-shrink:0;
+  transition:all 0.2s;
+}
+.cl-item.done .cl-check{background:var(--green);border-color:var(--green);color:#000;}
+.cl-progress{
+  margin-top:10px;
+  height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+}
+.cl-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s;}
+.cl-pct{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:5px;text-align:right;}
+
+/* ── PARAMS ── */
+.param-row{
+  display:flex;gap:8px;margin-bottom:8px;align-items:center;
+}
+.param-key,.param-val{
+  flex:1;background:var(--s2);border:1px solid var(--border);
+  border-radius:6px;padding:7px 10px;
+  font-family:var(--mono);font-size:11.5px;color:var(--text);
+  outline:none;
+  transition:border-color 0.15s;
+}
+.param-key:focus,.param-val:focus{border-color:var(--po);}
+.param-key::placeholder,.param-val::placeholder{color:var(--text4);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-logo">P</div>
+    <div>
+      <div class="brand-name">Pharma<span>Flow</span> API Tester</div>
+      <div class="brand-tag">End-to-End Testing Console</div>
+    </div>
+  </div>
+  <div class="base-url-bar">
+    <span class="base-lbl">BASE URL</span>
+    <input class="base-inp" id="baseUrl" value="http://localhost:8080" placeholder="http://localhost:8080"/>
+    <div class="status-dot" id="statusDot" title="Server status"></div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- PO -->
+    <div class="sidebar-section">
+      <div class="section-header" onclick="toggleSection('po-list','po-arrow')">
+        <div class="section-dot" style="background:var(--po)"></div>
+        <span class="section-label" style="color:var(--po)">Procurement Officer</span>
+        <span class="section-count">2</span>
+        <span class="section-toggle open" id="po-arrow">▶</span>
+      </div>
+      <div class="endpoint-list" id="po-list">
+        <div class="ep-item active" onclick="loadEP('po-add')">
+          <span class="method-tag m-post">POST</span>
+          <span class="ep-name">Add Product Request</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('po-get')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get All Products</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="sidebar-section">
+      <div class="section-header" onclick="toggleSection('admin-list','admin-arrow')">
+        <div class="section-dot" style="background:var(--admin)"></div>
+        <span class="section-label" style="color:var(--admin)">Admin</span>
+        <span class="section-count">1</span>
+        <span class="section-toggle open" id="admin-arrow">▶</span>
+      </div>
+      <div class="endpoint-list" id="admin-list">
+        <div class="ep-item" onclick="loadEP('admin-status')">
+          <span class="method-tag m-put">PUT</span>
+          <span class="ep-name">Update Admin Status</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPLIER -->
+    <div class="sidebar-section">
+      <div class="section-header" onclick="toggleSection('sup-list','sup-arrow')">
+        <div class="section-dot" style="background:var(--sup)"></div>
+        <span class="section-label" style="color:var(--sup)">Supplier</span>
+        <span class="section-count">2</span>
+        <span class="section-toggle open" id="sup-arrow">▶</span>
+      </div>
+      <div class="endpoint-list" id="sup-list">
+        <div class="ep-item" onclick="loadEP('sup-approved')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get Approved Products</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('sup-submit')">
+          <span class="method-tag m-post">POST</span>
+          <span class="ep-name">Submit Supplier Bill</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOREKEEPER -->
+    <div class="sidebar-section">
+      <div class="section-header" onclick="toggleSection('sk-list','sk-arrow')">
+        <div class="section-dot" style="background:var(--sk)"></div>
+        <span class="section-label" style="color:var(--sk)">StoreKeeper</span>
+        <span class="section-count">3</span>
+        <span class="section-toggle open" id="sk-arrow">▶</span>
+      </div>
+      <div class="endpoint-list" id="sk-list">
+        <div class="ep-item" onclick="loadEP('sk-pending')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get Pending Bills</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('sk-accept')">
+          <span class="method-tag m-put">PUT</span>
+          <span class="ep-name">Accept Supplier Bill</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('sk-stock')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get All Stock</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHARMACIST -->
+    <div class="sidebar-section">
+      <div class="section-header" onclick="toggleSection('ph-list','ph-arrow')">
+        <div class="section-dot" style="background:var(--ph)"></div>
+        <span class="section-label" style="color:var(--ph)">Pharmacist</span>
+        <span class="section-count">5</span>
+        <span class="section-toggle open" id="ph-arrow">▶</span>
+      </div>
+      <div class="endpoint-list" id="ph-list">
+        <div class="ep-item" onclick="loadEP('ph-stock')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get Available Stock</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('ph-dispense')">
+          <span class="method-tag m-post">POST</span>
+          <span class="ep-name">Dispense Medicine</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('ph-records')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get Dispense Records</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('ph-return')">
+          <span class="method-tag m-post">POST</span>
+          <span class="ep-name">Return Medicine</span>
+        </div>
+        <div class="ep-item" onclick="loadEP('ph-retrecords')">
+          <span class="method-tag m-get">GET</span>
+          <span class="ep-name">Get Return Records</span>
+        </div>
+      </div>
+    </div>
+
+  <!-- checklist at bottom of sidebar -->
+    <div class="checklist">
+      <div class="cl-title">Test Progress</div>
+      <div class="cl-item" id="cl-1"><div class="cl-check" id="ck-1"></div> PO creates product</div>
+      <div class="cl-item" id="cl-2"><div class="cl-check" id="ck-2"></div> Admin approves</div>
+      <div class="cl-item" id="cl-3"><div class="cl-check" id="ck-3"></div> Supplier submits bill</div>
+      <div class="cl-item" id="cl-4"><div class="cl-check" id="ck-4"></div> StoreKeeper accepts</div>
+      <div class="cl-item" id="cl-5"><div class="cl-check" id="ck-5"></div> Pharmacist dispenses</div>
+      <div class="cl-item" id="cl-6"><div class="cl-check" id="ck-6"></div> Return processed</div>
+      <div class="cl-progress"><div class="cl-fill" id="clFill" style="width:0%"></div></div>
+      <div class="cl-pct" id="clPct">0 / 6 completed</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- REQUEST PANE -->
+    <div class="request-pane">
+
+      <div class="req-header">
+        <div class="req-role" id="reqRole"></div>
+        <div class="req-title" id="reqTitle">Add Product Request</div>
+        <div class="req-desc" id="reqDesc">PO submits a new procurement request to Admin for approval.</div>
+      </div>
+
+      <div class="url-bar">
+        <span class="url-method method-tag m-post" id="urlMethod">POST</span>
+        <input class="url-path" id="urlPath" value="/api/products" readonly/>
+        <button class="send-btn" id="sendBtn" onclick="sendRequest()">▶ Send</button>
+      </div>
+
+      <div id="pathParamsSection" style="display:none;margin-bottom:16px;">
+        <div class="section-title-sm">Path Parameters</div>
+        <div id="pathParams"></div>
+      </div>
+
+      <div id="bodySection">
+        <div class="section-title-sm">Request Body (JSON)</div>
+        <div class="body-editor">
+          <div class="editor-head">
+            <span class="editor-label">JSON · application/json</span>
+            <button class="copy-btn" onclick="copyBody()">Copy</button>
+          </div>
+          <textarea class="body-ta" id="bodyTA" rows="10" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FLOW GUIDE -->
+    <div class="flow-guide">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;white-space:nowrap">TEST ORDER →</span>
+      <div class="fg-step" style="background:rgba(56,189,248,0.1);color:var(--po);border-color:rgba(56,189,248,0.2)" onclick="loadEP('po-add')">
+        <span class="fg-num">1</span> POST /products
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(129,140,248,0.1);color:var(--admin);border-color:rgba(129,140,248,0.2)" onclick="loadEP('admin-status')">
+        <span class="fg-num">2</span> PUT admin/status
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(52,211,153,0.1);color:var(--sup);border-color:rgba(52,211,153,0.2)" onclick="loadEP('sup-approved')">
+        <span class="fg-num">3</span> GET approved
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(52,211,153,0.1);color:var(--sup);border-color:rgba(52,211,153,0.2)" onclick="loadEP('sup-submit')">
+        <span class="fg-num">4</span> POST supplier/submit
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(251,191,36,0.1);color:var(--sk);border-color:rgba(251,191,36,0.2)" onclick="loadEP('sk-accept')">
+        <span class="fg-num">5</span> PUT sk/accept
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(244,114,182,0.1);color:var(--ph);border-color:rgba(244,114,182,0.2)" onclick="loadEP('ph-dispense')">
+        <span class="fg-num">6</span> POST dispense
+      </div>
+      <span class="fg-sep">→</span>
+      <div class="fg-step" style="background:rgba(244,114,182,0.1);color:var(--ph);border-color:rgba(244,114,182,0.2)" onclick="loadEP('ph-return')">
+        <span class="fg-num">7</span> POST return
+      </div>
+    </div>
+
+    <!-- RESPONSE PANE -->
+    <div class="response-pane">
+      <div class="res-header">
+        <span class="res-title">Response</span>
+        <span class="res-status" id="resStatus"></span>
+        <span class="res-time" id="resTime"></span>
+        <button class="copy-btn" style="margin-left:auto" onclick="copyResponse()">Copy</button>
+      </div>
+      <div class="res-body" id="resBody">
+        <div class="res-placeholder">▶ Hit Send to see the response here</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+// ── ENDPOINT DEFINITIONS ──
+const ENDPOINTS = {
+  'po-add': {
+    role:'Procurement Officer', roleColor:'var(--po)',
+    method:'POST', path:'/api/products',
+    title:'Add Product Request',
+    desc:'PO submits a new procurement request. adminStatus defaults to false — awaiting Admin approval.',
+    body: JSON.stringify({
+      sku: "PCT-500MG-TAB",
+      productName: "Paracetamol 500mg",
+      genericName: "Acetaminophen",
+      formulation: "Tablet",
+      strength: "500mg",
+      requiredQuantity: 500,
+      storageCondition: "Store below 25°C",
+      adminStatus: false,
+      supplierStatus: false
+    }, null, 2),
+    checklistId: 1
+  },
+  'po-get': {
+    role:'Procurement Officer', roleColor:'var(--po)',
+    method:'GET', path:'/api/products',
+    title:'Get All Products',
+    desc:'Returns all procurement requests submitted by the PO.',
+    body: null
+  },
+  'admin-status': {
+    role:'Admin', roleColor:'var(--admin)',
+    method:'PUT', path:'/api/admin/update-admin-status/{id}',
+    title:'Update Admin Status',
+    desc:'Admin approves (true) or rejects (false) a PO request by productId. Once approved, Supplier can see this product.',
+    pathParams: [{ key:'id', placeholder:'Product ID e.g. 1', default:'1' }],
+    body: JSON.stringify({ adminStatus: true }, null, 2),
+    checklistId: 2
+  },
+  'sup-approved': {
+    role:'Supplier', roleColor:'var(--sup)',
+    method:'GET', path:'/api/supplier/approved-products',
+    title:'Get Approved Products',
+    desc:'Returns only products where adminStatus=true. Supplier uses this list to know what to supply.',
+    body: null
+  },
+  'sup-submit': {
+    role:'Supplier', roleColor:'var(--sup)',
+    method:'POST', path:'/api/supplier/submit',
+    title:'Submit Supplier Bill',
+    desc:'Supplier submits bill with batch info, quantity, and pricing. supplierStatus auto-set to true — StoreKeeper can now see this.',
+    body: JSON.stringify({
+      productId: 1,
+      batchId: "PCT-B001",
+      productName: "Paracetamol 500mg",
+      genericName: "Acetaminophen",
+      manufacturer: "MedSupply Co.",
+      manufactureDate: "2024-08-01",
+      expiryDate: "2026-08-01",
+      quantity: 500,
+      amountPerQuantity: 2.50,
+      totalAmount: 1250.00,
+      supplierStatus: true
+    }, null, 2),
+    checklistId: 3
+  },
+  'sk-pending': {
+    role:'StoreKeeper', roleColor:'var(--sk)',
+    method:'GET', path:'/api/storekeeper/pending-bills',
+    title:'Get Pending Supplier Bills',
+    desc:'Returns all supplier bills where supplierStatus=true. StoreKeeper reviews these before accepting.',
+    body: null
+  },
+  'sk-accept': {
+    role:'StoreKeeper', roleColor:'var(--sk)',
+    method:'PUT', path:'/api/storekeeper/accept/{supplierId}',
+    title:'Accept Supplier Bill → Create Stock',
+    desc:'StoreKeeper accepts a bill. System checks: if same batchId+productId exists → MERGE quantity. If new batch → CREATE new StockItem.',
+    pathParams: [{ key:'supplierId', placeholder:'Supplier Bill ID e.g. 1', default:'1' }],
+    body: JSON.stringify({ accepted: true, storekeeperId: "SK001" }, null, 2),
+    checklistId: 4
+  },
+  'sk-stock': {
+    role:'StoreKeeper', roleColor:'var(--sk)',
+    method:'GET', path:'/api/storekeeper/stock',
+    title:'Get All Stock Inventory',
+    desc:'Returns all StockItems where storekeepersAccepted=true. Shows totalQuantity and availableQuantity.',
+    body: null
+  },
+  'ph-stock': {
+    role:'Pharmacist', roleColor:'var(--ph)',
+    method:'GET', path:'/api/pharmacist/stock',
+    title:'Get Available Stock',
+    desc:'Pharmacist views all accepted stock. Only stock accepted by StoreKeeper is visible here.',
+    body: null
+  },
+  'ph-dispense': {
+    role:'Pharmacist', roleColor:'var(--ph)',
+    method:'POST', path:'/api/pharmacist/dispense',
+    title:'Dispense Medicine to Patient',
+    desc:'Dispenses medicine. Decrements availableQuantity in StockItem. Creates DispenseRecord with status=DISPENSED.',
+    body: JSON.stringify({
+      stockId: 1,
+      patientName: "Ravi Kumar",
+      patientId: "P001",
+      prescriptionRef: "RX-20250301",
+      quantityDispensed: 30,
+      dispensedBy: "Ph001"
+    }, null, 2),
+    checklistId: 5
+  },
+  'ph-records': {
+    role:'Pharmacist', roleColor:'var(--ph)',
+    method:'GET', path:'/api/pharmacist/dispense-records',
+    title:'Get All Dispense Records',
+    desc:'Returns all DispenseRecords. Status can be DISPENSED or RETURNED.',
+    body: null
+  },
+  'ph-return': {
+    role:'Pharmacist', roleColor:'var(--ph)',
+    method:'POST', path:'/api/pharmacist/return',
+    title:'Return Medicine → Auto Restock',
+    desc:'Patient returns medicine. availableQuantity in StockItem is auto-incremented. DispenseRecord status → RETURNED. ReturnRecord created with restocked=true.',
+    body: JSON.stringify({
+      dispenseId: 1,
+      quantityReturned: 10,
+      returnReason: "Dosage changed by doctor",
+      returnedBy: "Ph001"
+    }, null, 2),
+    checklistId: 6
+  },
+  'ph-retrecords': {
+    role:'Pharmacist', roleColor:'var(--ph)',
+    method:'GET', path:'/api/pharmacist/return-records',
+    title:'Get All Return Records',
+    desc:'Returns all ReturnRecords. restocked=true means quantity has been added back to inventory.',
+    body: null
+  }
+};
+
+let currentEP = 'po-add';
+let checklist = new Set();
+let pathParamValues = {};
+
+// ── LOAD ENDPOINT ──
+function loadEP(id) {
+  currentEP = id;
+  const ep = ENDPOINTS[id];
+  pathParamValues = {};
+
+  // Sidebar active
+  document.querySelectorAll('.ep-item').forEach(e => e.classList.remove('active'));
+  event?.currentTarget?.classList.add('active');
+
+  // Role tag
+  const roleEl = document.getElementById('reqRole');
+  roleEl.textContent = ep.role;
+  roleEl.style.background = ep.roleColor.replace('var(','rgba(').replace(')',',0.12)');
+  roleEl.style.color = ep.roleColor;
+  roleEl.style.border = `1px solid ${ep.roleColor.replace('var(','rgba(').replace(')',',0.3)')}`;
+
+  document.getElementById('reqTitle').textContent = ep.title;
+  document.getElementById('reqDesc').textContent = ep.desc;
+
+  // Method
+  const methodEl = document.getElementById('urlMethod');
+  methodEl.textContent = ep.method;
+  methodEl.className = 'method-tag url-method ' + 'm-' + ep.method.toLowerCase();
+
+  // Path
+  document.getElementById('urlPath').value = ep.path;
+
+  // Path params
+  const ppSection = document.getElementById('pathParamsSection');
+  const ppContainer = document.getElementById('pathParams');
+  if (ep.pathParams && ep.pathParams.length > 0) {
+    ppSection.style.display = 'block';
+    ppContainer.innerHTML = ep.pathParams.map((p,i) => `
+      <div class="param-row">
+        <input class="param-key" value="{${p.key}}" readonly/>
+        <input class="param-val" id="pp-${p.key}" placeholder="${p.placeholder}" value="${p.default||''}"
+          oninput="updatePathParam('${p.key}', this.value)"/>
+      </div>`).join('');
+    ep.pathParams.forEach(p => { pathParamValues[p.key] = p.default || ''; });
+  } else {
+    ppSection.style.display = 'none';
+  }
+
+  // Body
+  const bodySection = document.getElementById('bodySection');
+  const bodyTA = document.getElementById('bodyTA');
+  if (ep.body) {
+    bodySection.style.display = 'block';
+    bodyTA.value = ep.body;
+  } else {
+    bodySection.style.display = 'none';
+    bodyTA.value = '';
+  }
+
+  // Clear response
+  document.getElementById('resBody').innerHTML = '<div class="res-placeholder">▶ Hit Send to see the response here</div>';
+  document.getElementById('resStatus').className = 'res-status';
+  document.getElementById('resStatus').textContent = '';
+  document.getElementById('resTime').textContent = '';
+}
+
+function updatePathParam(key, val) {
+  pathParamValues[key] = val;
+}
+
+function buildUrl() {
+  const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
+  let path = ENDPOINTS[currentEP].path;
+  Object.entries(pathParamValues).forEach(([k, v]) => {
+    path = path.replace(`{${k}}`, v || `{${k}}`);
+  });
+  return base + path;
+}
+
+// ── SEND REQUEST ──
+async function sendRequest() {
+  const ep = ENDPOINTS[currentEP];
+  const btn = document.getElementById('sendBtn');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Sending...';
+
+  const url = buildUrl();
+  const method = ep.method;
+  const start = Date.now();
+
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+  };
+
+  if (ep.body && method !== 'GET') {
+    try { opts.body = document.getElementById('bodyTA').value; }
+    catch(e) {}
+  }
+
+  try {
+    const res = await fetch(url, opts);
+    const ms = Date.now() - start;
+    let data;
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      data = await res.text();
+    }
+
+    const statusEl = document.getElementById('resStatus');
+    statusEl.textContent = `${res.status} ${res.statusText}`;
+    statusEl.className = 'res-status ' + (res.ok ? 'ok' : 'err');
+    document.getElementById('resTime').textContent = `${ms}ms`;
+
+    const bodyEl = document.getElementById('resBody');
+    if (typeof data === 'object') {
+      bodyEl.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+    } else {
+      bodyEl.textContent = data;
+    }
+
+    // Update status dot
+    document.getElementById('statusDot').className = 'status-dot online';
+
+    // Checklist
+    if (res.ok && ep.checklistId) {
+      markChecklist(ep.checklistId);
+    }
+
+  } catch (err) {
+    const ms = Date.now() - start;
+    document.getElementById('resStatus').textContent = 'ERROR';
+    document.getElementById('resStatus').className = 'res-status err';
+    document.getElementById('resTime').textContent = `${ms}ms`;
+    document.getElementById('resBody').innerHTML = `<span style="color:var(--red)">
+⚠ Could not connect to ${url}
+
+Make sure your Spring Boot server is running:
+  mvn spring-boot:run  OR  java -jar app.jar
+
+Check:
+  • Server running on correct port?
+  • CORS enabled in your controllers (@CrossOrigin("*"))?
+  • Database connected (check application.properties)?
+
+Error: ${err.message}
+</span>`;
+    document.getElementById('statusDot').className = 'status-dot offline';
+  }
+
+  btn.classList.remove('loading');
+  btn.textContent = '▶ Send';
+}
+
+// ── SYNTAX HIGHLIGHT ──
+function syntaxHighlight(json) {
+  return json
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      let cls = 'j-num';
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'j-key' : 'j-str';
+      } else if (/true|false/.test(match)) {
+        cls = 'j-bool';
+      } else if (/null/.test(match)) {
+        cls = 'j-null';
+      }
+      return `<span class="${cls}">${match}</span>`;
+    });
+}
+
+// ── CHECKLIST ──
+function markChecklist(id) {
+  checklist.add(id);
+  document.getElementById(`cl-${id}`).classList.add('done');
+  document.getElementById(`ck-${id}`).textContent = '✓';
+  const pct = Math.round((checklist.size / 6) * 100);
+  document.getElementById('clFill').style.width = pct + '%';
+  document.getElementById('clPct').textContent = `${checklist.size} / 6 completed`;
+}
+
+// ── TOGGLE SECTION ──
+function toggleSection(listId, arrowId) {
+  const list = document.getElementById(listId);
+  const arrow = document.getElementById(arrowId);
+  const isOpen = arrow.classList.contains('open');
+  if (isOpen) {
+    list.style.display = 'none';
+    arrow.classList.remove('open');
+  } else {
+    list.style.display = 'block';
+    arrow.classList.add('open');
+  }
+}
+
+// ── COPY ──
+function copyBody() {
+  navigator.clipboard.writeText(document.getElementById('bodyTA').value);
+}
+function copyResponse() {
+  navigator.clipboard.writeText(document.getElementById('resBody').textContent);
+}
+
+// ── INIT ──
+loadEP('po-add');
+// Highlight active item on load
+document.querySelector('.ep-item.active') && null;
+// Fix sidebar active on load
+document.querySelectorAll('.ep-item')[0].classList.add('active');
+</script>
+</body>
+</html>
