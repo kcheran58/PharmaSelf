@@ -22,12 +22,15 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Autowired
     private ReturnRecordRepository returnRecordRepository;
+    
 
+    //Get the availablestocks
     @Override
     public List<StockItem> getAvailableStock() {
         return stockItemRepository.findByStorekeepersAcceptedTrue();
     }
-
+    
+    //Dispense new record 
     @Override
     @Transactional
     public DispenseRecord dispense(DispenseRequest req) {
@@ -46,7 +49,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         stockItemRepository.save(stock);
 
         DispenseRecord record = new DispenseRecord();
-        record.setStockItem(stock);                      // ✅ JPA relationship
+        record.setStockItem(stock);                      // JPA relationship
         record.setProductId(stock.getProductId());
         record.setProductName(stock.getProductName());
         record.setBatchId(stock.getBatchId());
@@ -60,20 +63,25 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         return dispenseRecordRepository.save(record);
     }
+     
 
+    //return the dispensed item
     @Override
     @Transactional
     public ReturnRecord returnMedicine(ReturnRequest req) {
+        //Get the dispensed record details 
         DispenseRecord dispense = dispenseRecordRepository.findById(req.getDispenseId())
                 .orElseThrow(() -> new RuntimeException(
-                    "Dispense record not found: " + req.getDispenseId()
+                    "Dispense record not found: " + req.getDispenseId()//if record not available it throws the runtime exception with message record not found
                 ));
+        
 
+        //if dispensed quantity < returned quantity then it considered as fake medicines we did'nt dispensed that medicines
         if (req.getQuantityReturned() > dispense.getQuantityDispensed()) {
             throw new RuntimeException("Return quantity exceeds dispensed quantity.");
         }
 
-        // ✅ LAZY loads stockItem — @Transactional keeps session open
+        //LAZY loads stockItem — @Transactional keeps session open
         StockItem stock = dispense.getStockItem();
         stock.setAvailableQuantity(
             stock.getAvailableQuantity() + req.getQuantityReturned()
@@ -82,9 +90,11 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         dispense.setStatus("RETURNED");
         dispenseRecordRepository.save(dispense);
+        
 
+        //Insert new return record details in the return-record table
         ReturnRecord returnRecord = new ReturnRecord();
-        returnRecord.setDispenseRecord(dispense);        // ✅ JPA relationship
+        returnRecord.setDispenseRecord(dispense);        //JPA relationship
         returnRecord.setProductId(dispense.getProductId());
         returnRecord.setProductName(dispense.getProductName());
         returnRecord.setBatchId(dispense.getBatchId());
@@ -98,16 +108,22 @@ public class PharmacistServiceImpl implements PharmacistService {
         return returnRecordRepository.save(returnRecord);
     }
 
+
+    //get all dispensed record
     @Override
     public List<DispenseRecord> getAllDispenseRecords() {
         return dispenseRecordRepository.findAll();
     }
+    
 
+    //get dispense record by patient Id
     @Override
     public List<DispenseRecord> getDispenseByPatient(String patientId) {
         return dispenseRecordRepository.findByPatientId(patientId);
-    }
+    } 
+    
 
+    //get all return records in the table
     @Override
     public List<ReturnRecord> getAllReturnRecords() {
         return returnRecordRepository.findAll();

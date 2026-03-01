@@ -26,7 +26,7 @@ public class ReturnRecord {
     private String returnedBy;
     private boolean restocked;
 
-    // ✅ JPA: One ReturnRecord → One DispenseRecord
+    // JPA: One ReturnRecord → One DispenseRecord
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispenseId", nullable = false)
     @JsonBackReference("dispense-return")

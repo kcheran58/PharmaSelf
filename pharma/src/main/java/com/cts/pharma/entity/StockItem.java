@@ -38,7 +38,7 @@ public class StockItem {
     private boolean storekeepersAccepted;
     private LocalDate acceptedDate;
 
-    // ✅ JPA Relationship: One StockItem → Many DispenseRecords
+    // JPA Relationship: One StockItem → Many DispenseRecords
     @ToString.Exclude
     @OneToMany(
         mappedBy = "stockItem",

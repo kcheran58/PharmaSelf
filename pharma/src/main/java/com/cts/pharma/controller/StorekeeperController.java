@@ -14,7 +14,7 @@ import java.util.List;
 public class StorekeeperController {
 
     @Autowired
-    private StorekeeperService storekeeperService;     // ✅ Spring injects StorekeeperServiceImpl
+    private StorekeeperService storekeeperService;    
 
     // GET /api/storekeeper/pending-bills
     @GetMapping("/pending-bills")

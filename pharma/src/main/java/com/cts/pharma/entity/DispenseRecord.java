@@ -28,13 +28,13 @@ public class DispenseRecord {
     private String dispensedBy;
     private String status; // DISPENSED | RETURNED
 
-    // ✅ JPA: Many DispenseRecords → One StockItem
+    //JPA: Many DispenseRecords → One StockItem
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stockId", nullable = false)
     @JsonBackReference("stock-dispense")
     private StockItem stockItem;
 
-    // ✅ JPA: One DispenseRecord → One ReturnRecord
+    // JPA: One DispenseRecord → One ReturnRecord
     @ToString.Exclude
     @OneToOne(
         mappedBy = "dispenseRecord",

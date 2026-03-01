@@ -20,13 +20,13 @@ public class SupplierServiceImpl implements SupplierService {
     @Autowired
     private SupplierRepository supplierRepository;
 
-    // ✅ 1. View Admin Approved Products
+    // 1. View Admin Approved Products
     @Override
     public List<ProcurementProduct> getApprovedProducts() {
         return procurementRepository.findByAdminStatusTrue();
     }
 
-    // ✅ 2. Supplier fills details
+    //2. Supplier fills details
     @Override
     public Supplier submitSupplierDetails(Supplier supplier) {
 

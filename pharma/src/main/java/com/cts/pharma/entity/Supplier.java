@@ -13,7 +13,7 @@ public class Supplier {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer billId;   // ✅ PRIMARY KEY
+    private Integer billId;   //PRIMARY KEY
 
     private Integer productId;
 
