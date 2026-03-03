@@ -41,26 +41,26 @@ public class StorekeeperServiceImpl implements StorekeeperService {
      }
  
      // Fetch storageCondition from original ProcurementProduct
-     ProcurementProduct product = productRepository.findById(supplier.getProductId())
-             .orElseThrow(() -> new RuntimeException("Product not found: " + supplier.getProductId()));
+     ProcurementProduct product = productRepository.findById(supplier.getRequestId())
+             .orElseThrow(() -> new RuntimeException("Product not found: " + supplier.getRequestId()));
  
      Optional<StockItem> existingBatch = stockItemRepository
-             .findByBatchIdAndProductId(supplier.getBatchId(), supplier.getProductId());
+             .findByBatchIdAndRequestId(supplier.getBatchId(), supplier.getRequestId());
  
      if (existingBatch.isPresent()) {
          // MERGE — same batch
          StockItem stock = existingBatch.get();
          stock.setTotalQuantity(stock.getTotalQuantity() + supplier.getQuantity());
          stock.setAvailableQuantity(stock.getAvailableQuantity() + supplier.getQuantity());
-         stock.setSupplierId(supplier.getBillId());
+         stock.setBillId(supplier.getBillId());
          return stockItemRepository.save(stock);
  
      } 
      else {
          // CREATE — new batch
          StockItem stock = new StockItem();
-         stock.setSupplierId(supplier.getBillId());
-         stock.setProductId(supplier.getProductId());
+         stock.setBillId(supplier.getBillId());
+         stock.setRequestId(supplier.getRequestId());
          stock.setSku(product.getSku());                          //from product
          stock.setProductName(supplier.getProductName());
          stock.setGenericName(supplier.getGenericName());
@@ -86,7 +86,7 @@ public class StorekeeperServiceImpl implements StorekeeperService {
 
     @Override
     public List<StockItem> getStockByProduct(Integer productId) {
-        return stockItemRepository.findByProductId(productId);
+        return stockItemRepository.findByRequestId(productId);
     }
 }
 

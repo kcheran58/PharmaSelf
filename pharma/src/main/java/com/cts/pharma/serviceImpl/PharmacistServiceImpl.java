@@ -50,7 +50,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         DispenseRecord record = new DispenseRecord();
         record.setStockItem(stock);                      // JPA relationship
-        record.setProductId(stock.getProductId());
+        record.setRequestId(stock.getRequestId());
         record.setProductName(stock.getProductName());
         record.setBatchId(stock.getBatchId());
         record.setPatientName(req.getPatientName());
@@ -95,7 +95,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         //Insert new return record details in the return-record table
         ReturnRecord returnRecord = new ReturnRecord();
         returnRecord.setDispenseRecord(dispense);        //JPA relationship
-        returnRecord.setProductId(dispense.getProductId());
+        returnRecord.setRequestId(dispense.getRequestId());
         returnRecord.setProductName(dispense.getProductName());
         returnRecord.setBatchId(dispense.getBatchId());
         returnRecord.setPatientId(dispense.getPatientId());

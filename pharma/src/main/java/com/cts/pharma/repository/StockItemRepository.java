@@ -7,9 +7,9 @@ import java.util.Optional;
 
 public interface StockItemRepository extends JpaRepository<StockItem, Integer> {
     List<StockItem> findByStorekeepersAcceptedTrue();
-    List<StockItem> findBySupplierId(Integer supplierId);
-    List<StockItem> findByProductId(Integer productId);
+    List<StockItem> findByBillId(Integer billId);
+    List<StockItem> findByRequestId(Integer requestId);
 
     // ✅ For same-batch merge logic
-    Optional<StockItem> findByBatchIdAndProductId(String batchId, Integer productId);
+    Optional<StockItem> findByBatchIdAndRequestId(String batchId, Integer requestId);
   }

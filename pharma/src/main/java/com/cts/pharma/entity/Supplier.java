@@ -15,7 +15,7 @@ public class Supplier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer billId;   //PRIMARY KEY
 
-    private Integer productId;
+    private Integer requestId;
 
     private String batchId;
 

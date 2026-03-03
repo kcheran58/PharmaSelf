@@ -16,11 +16,11 @@ public class ReturnRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer returnId;
 
-    private Integer productId;
+    private int requestId;
     private String productName;
     private String batchId;
     private String patientId;
-    private Integer quantityReturned;
+    private int  quantityReturned;
     private String returnReason;
     private LocalDate returnDate;
     private String returnedBy;

@@ -17,8 +17,8 @@ public class StockItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer stockId;
 
-    private Integer supplierId;       // logical FK to Supplier.billId
-    private Integer productId;        // logical FK to ProcurementProduct
+    private Integer billId;           // references Bill entity
+    private Integer requestId;        // logical FK to ProcurementProduct
 
     private String sku;
     private String productName;

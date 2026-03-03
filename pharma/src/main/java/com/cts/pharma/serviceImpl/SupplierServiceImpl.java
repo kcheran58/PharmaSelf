@@ -32,7 +32,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         // Find procurement product
         ProcurementProduct product = procurementRepository
-                .findById(supplier.getProductId())
+                .findById(supplier.getRequestId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         // Save supplier details
@@ -45,4 +45,5 @@ public class SupplierServiceImpl implements SupplierService {
 
         return savedSupplier;
     }
+
 }
