@@ -11,7 +11,7 @@ import java.util.List;
 public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
 
     // 🔹 Optional: Find supplier details by productId
-    List<Supplier> findByProductId(Integer productId);
+    List<Supplier> findByRequestId(Integer requestId);
 
     // 🔹 Optional: Get only confirmed supplier records
     List<Supplier> findBySupplierStatusTrue();
